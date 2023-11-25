@@ -10,7 +10,7 @@ import allroutes from "./routes/index.js";
 const PORT = process.env.PORT || 8005;
 const app = express();
 const corsOptions = {
-  origin: "http://localhost:3000", // Update with your frontend's URL
+  // origin: "http://localhost:3000", // Update with your frontend's URL
   credentials: true,
 };
 
