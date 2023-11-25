@@ -9,9 +9,13 @@ import allroutes from "./routes/index.js";
 
 const PORT = process.env.PORT || 8005;
 const app = express();
+const corsOptions = {
+  origin: "http://localhost:3000", // Update with your frontend's URL
+  credentials: true,
+};
 
 //middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(morgan("tiny"));
 app.use(express.json());
 app.use(cookieParser());

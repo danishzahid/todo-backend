@@ -46,7 +46,7 @@ export const login = async (req, res, next) => {
       user.password
     );
     if (!isPasswordCorrect) {
-      return res.json("Incorrect Password");
+      return res.status(401).json({ error: "Incorrect Password" });
     }
 
     const payload = {
@@ -59,28 +59,35 @@ export const login = async (req, res, next) => {
     });
     return res
       .cookie("access_token", token, {
-        httpOnly: true,
+        httpOnly: false,
       })
       .status(200)
       .json({ message: "login successful" });
   } catch (error) {
     console.log(error);
-    return next(err);
+    return next(error);
   }
 };
 
-export const logout = (req, res) => {
-  res.clearCookie("access_token");
-  return res.status(200).json({ message: "logout successful" });
+export const logout = async (req, res) => {
+  try {
+    await res.clearCookie("access_token");
+    return res.status(200).json({ message: "logout successful" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 export const isLoggedIn = (req, res) => {
   const token = req.cookies.access_token;
+  console.log(token, "token");
   if (!token) {
     return res.json(false);
   }
   return jwt.verify(token, process.env.JWT_SECRET, (err) => {
     if (err) {
+      console.log("error occured");
       return res.json(false);
     }
     return res.json(true);
