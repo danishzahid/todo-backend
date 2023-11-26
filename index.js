@@ -10,7 +10,10 @@ import allroutes from "./routes/index.js";
 const PORT = process.env.PORT || 8005;
 const app = express();
 const corsOptions = {
-  origin: "*",
+  origin: [
+    "https://todo-frontend-danishzahid.vercel.app",
+    "https://todo-frontend-4fil78wag-danishzahid.vercel.app",
+  ],
   credentials: true,
 };
 
