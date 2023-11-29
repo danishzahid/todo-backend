@@ -84,7 +84,7 @@ export const logout = async (req, res) => {
 export const isLoggedIn = async (req, res) => {
   const token = req.cookies.access_token;
   if (!token) {
-    return res.json(true); //change it after fixing bug
+    return res.json(false); //change it after fixing bug
   }
   return jwt.verify(token, process.env.JWT_SECRET, (err) => {
     if (err) {

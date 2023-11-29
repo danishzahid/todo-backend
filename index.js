@@ -13,6 +13,7 @@ const corsOptions = {
   origin: [
     "https://todo-frontend-danishzahid.vercel.app",
     "https://todo-frontend-4fil78wag-danishzahid.vercel.app",
+    "http://localhost:3000",
   ],
   credentials: true,
 };
