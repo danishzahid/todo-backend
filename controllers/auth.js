@@ -1,59 +1,40 @@
 import bcryptjs from "bcryptjs";
-import User from "../models/User.js";
 import jwt from "jsonwebtoken";
-
+import User from "../models/User.js";
 import createError from "../utils/createError.js";
 
-export const signup = async (req, res, next) => {
-  if (!req.body.name || !req.body.email || !req.body.password) {
-    return next(
-      createError({ status: 400, message: "Name, email, Password is required" })
-    );
-  }
-  try {
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(req.body.password, salt);
-
-    const newUSer = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: hashedPassword,
-    });
-
-    await newUSer.save();
-    return res.status(201).json("new user created");
-  } catch (err) {
-    console.log(err);
-    return next(err);
-  }
-};
 export const login = async (req, res, next) => {
   if (!req.body.email || !req.body.password) {
     return next(
-      createError({ status: 401, message: "Required field : email password" })
+      createError({
+        message: "Email and password are required",
+        statusCode: 400,
+      })
     );
   }
+
   try {
     const user = await User.findOne({ email: req.body.email }).select(
       "name email password"
     );
     if (!user) {
-      return res.status(404).json("No user found");
+      return next(
+        createError({ status: 404, message: "User not found with the email" })
+      );
     }
-
     const isPasswordCorrect = await bcryptjs.compare(
       req.body.password,
       user.password
     );
     if (!isPasswordCorrect) {
-      return res.status(401).json({ error: "Incorrect Password" });
+      return next(
+        createError({ status: 400, message: "Password is incorrect" })
+      );
     }
-
     const payload = {
       id: user._id,
       name: user.name,
     };
-
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
@@ -62,32 +43,51 @@ export const login = async (req, res, next) => {
         httpOnly: true,
       })
       .status(200)
-      .json({ message: "login successful" });
-  } catch (error) {
-    console.log(error);
-    return next(error);
+      .json({ name: user.name, email: user.email, message: "login success" });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const signup = async (req, res, next) => {
+  if (!req.body.name || !req.body.email || !req.body.password) {
+    return next(
+      createError({
+        message: "Name, Email & password are required",
+        statusCode: 400,
+      })
+    );
+  }
+
+  try {
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(req.body.password, salt);
+
+    const newUser = new User({
+      name: req.body.name,
+      email: req.body.email,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+    return res.status(201).json("New User Created");
+  } catch (err) {
+    return next(err);
   }
 };
 
 export const logout = async (req, res) => {
-  try {
-    await res.clearCookie("access_token");
-    return res.status(200).json({ message: "logout successful" });
-  } catch (error) {
-    console.error("Logout error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
+  res.clearCookie("access_token");
+  return res.status(200).json({ message: "logout success" });
 };
 
-export const isLoggedIn = (req, res) => {
+export const isLoggedIn = async (req, res) => {
   const token = req.cookies.access_token;
-  console.log(token, "token");
   if (!token) {
     return res.json(false);
   }
   return jwt.verify(token, process.env.JWT_SECRET, (err) => {
     if (err) {
-      console.log("error occured");
       return res.json(false);
     }
     return res.json(true);
