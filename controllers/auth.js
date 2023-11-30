@@ -38,9 +38,12 @@ export const login = async (req, res, next) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
+    const dynamicDomain = req.get("host");
     return res
       .cookie("access_token", token, {
         httpOnly: true,
+        domain: dynamicDomain,
+        secure: true,
         sameSite: "Lax",
       })
       .status(200)
