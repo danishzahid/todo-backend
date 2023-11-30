@@ -44,7 +44,7 @@ export const login = async (req, res, next) => {
         httpOnly: true,
         domain: dynamicDomain,
         secure: true,
-        sameSite: "Lax",
+        sameSite: "None",
       })
       .status(200)
       .json({ name: user.name, email: user.email, message: "login success" });
