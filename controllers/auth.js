@@ -39,11 +39,12 @@ export const login = async (req, res, next) => {
       expiresIn: "1d",
     });
     const dynamicDomain = req.get("host");
+    const isProduction = process.env.NODE_ENV == "production" ? true : false;
     return res
       .cookie("access_token", token, {
         httpOnly: true,
         domain: dynamicDomain,
-        secure: true,
+        secure: isProduction,
         sameSite: "None",
       })
       .status(200)
